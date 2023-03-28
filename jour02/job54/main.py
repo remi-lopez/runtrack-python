@@ -1,3 +1,5 @@
+import random
+
 
 class Board:
     def __init__(self, i, j):
@@ -32,6 +34,9 @@ class Board:
 
         print("- "*(self.j*2+1))
 
+    def is_valid(self, col):
+        return 0 <= col < self.j and self.board[0][col] == 'O'
+
     def check_win(self, color):
         jeton = self.__check_color(color)
 
@@ -60,42 +65,65 @@ class Board:
         return False
 
 
-def play_game():
+class AIOne:
+    def __init__(self, name):
+        self.name = name
+        self.color = "jaune"
+
+    @staticmethod
+    def think(board):
+        valid_cols = [col for col in range(board.j) if board.is_valid(col)]
+        return random.choice(valid_cols)
+
+
+class AITwo:
+    def __init__(self, name):
+        self.name = name
+        self.color = "rouge"
+
+    @staticmethod
+    def think(board):
+        valid_cols = [col for col in range(board.j) if board.is_valid(col)]
+        return random.choice(valid_cols)
+
+
+def play_game_vs_ai():
     i = int(input("Nombre de lignes : "))
     j = int(input("Nombre de colonnes : "))
     board = Board(i, j)
 
-    joueur1 = input("Nom du joueur 1 : ")
-    joueur2 = input("Nom du joueur 2 : ")
+    ai_one = AIOne("AI_ONE")
+    ai_two = AITwo("AI_TWO")
 
-    current_player = joueur1
-    current_color = "rouge"
+    players = [ai_one.name, ai_two.name]
+    random.shuffle(players)
+    current_player = players[0]
 
     while True:
-        print("\n")
-
         board.print_board()
-        col = int(input("%s - Dans quelle colonne voulez-vous jouer ? [0, %s] : " % (current_player, j - 1)))
 
-        if col >= j:
-            col = int(input("%s - Votre colonne n'existe pas, veuillez réessayer ? [0, %s] : " % (current_player, j - 1)))
+        if current_player == ai_one:
+            col = ai_one.think(board)
 
-        try:
-            board.play(col, current_color)
-        except ValueError:
-            print("Cette colonne est pleine. Veuillez en choisir une autre.")
-            continue
+            print("\n %s a jouée son coup dans la colonne : %s !" % (ai_one.name, col))
+            board.play(col, ai_one.color)
+        else:
+            col = ai_two.think(board)
 
-        if board.check_win(current_color):
-            print("\n %s a gagné ! Félicitations, vous avez remporté 100 000 euros !" % current_player)
+            print("\n %s a jouée son coup dans la colonne : %s !" % (ai_two.name, col))
+            board.play(col, ai_two.color)
+
+        if board.check_win(ai_one.color):
+            if current_player == ai_one:
+                print("\n %s A GAGNÉ !" % ai_one.name)
+            else:
+                print("\n %s A GAGNÉ !" % ai_two.name)
             break
 
-        if current_player == joueur1:
-            current_player = joueur2
-            current_color = "jaune"
+        if current_player == ai_one:
+            current_player = ai_two
         else:
-            current_player = joueur1
-            current_color = "rouge"
+            current_player = ai_one
 
 
-play_game()
+play_game_vs_ai()

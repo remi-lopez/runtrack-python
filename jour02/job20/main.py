@@ -1,3 +1,5 @@
+import random
+
 
 class Board:
     def __init__(self, i, j):
@@ -32,6 +34,9 @@ class Board:
 
         print("- "*(self.j*2+1))
 
+    def is_valid(self, col):
+        return 0 <= col < self.j and self.board[0][col] == 'O'
+
     def check_win(self, color):
         jeton = self.__check_color(color)
 
@@ -60,42 +65,69 @@ class Board:
         return False
 
 
-def play_game():
+class AIOne:
+    def __init__(self, name, color):
+        self.name = name
+        self.color = color
+
+    @staticmethod
+    def think(board):
+        valid_cols = [col for col in range(board.j) if board.is_valid(col)]
+        return random.choice(valid_cols)
+
+
+def play_game_vs_ai():
     i = int(input("Nombre de lignes : "))
     j = int(input("Nombre de colonnes : "))
     board = Board(i, j)
 
-    joueur1 = input("Nom du joueur 1 : ")
-    joueur2 = input("Nom du joueur 2 : ")
-
-    current_player = joueur1
-    current_color = "rouge"
+    joueur = input("Nom du joueur : ")
 
     while True:
-        print("\n")
+        color = input("Voulez-vous jouer en rouge ou en jaune ? ")
+        if color in ["rouge", "jaune"]:
+            if color == "rouge":
+                ai_color = "jaune"
+            else:
+                ai_color = "rouge"
 
+            j_color = color
+            break
+        print("Couleur invalide. Veuillez choisir entre rouge et jaune.")
+
+    ai = AIOne("AI", ai_color)
+
+    players = [joueur, ai.name]
+    random.shuffle(players)
+    current_player = players[0]
+
+    while True:
         board.print_board()
-        col = int(input("%s - Dans quelle colonne voulez-vous jouer ? [0, %s] : " % (current_player, j - 1)))
 
-        if col >= j:
-            col = int(input("%s - Votre colonne n'existe pas, veuillez réessayer ? [0, %s] : " % (current_player, j - 1)))
+        if current_player == joueur:
+            while True:
+                col = int(input("%s - Dans quelle colonne voulez-vous jouer ? [0, %s] : " % (current_player, j - 1)))
 
-        try:
-            board.play(col, current_color)
-        except ValueError:
-            print("Cette colonne est pleine. Veuillez en choisir une autre.")
-            continue
+                if board.is_valid(col):
+                    board.play(col, j_color)
+                    break
+        else:
+            col = ai.think(board)
 
-        if board.check_win(current_color):
-            print("\n %s a gagné ! Félicitations, vous avez remporté 100 000 euros !" % current_player)
+            print("\n L'IA a jouée son coup dans la colonne : %s !" % col)
+            board.play(col, ai.color)
+
+        if board.check_win(color):
+            if current_player == joueur:
+                print("\n %s a gagné ! Félicitations, vous avez remporté 100 000 euros !" % current_player)
+            else:
+                print("Dommage, vous avez perdu contre l'IA.")
             break
 
-        if current_player == joueur1:
-            current_player = joueur2
-            current_color = "jaune"
+        if current_player == joueur:
+            current_player = ai.name
         else:
-            current_player = joueur1
-            current_color = "rouge"
+            current_player = joueur
 
 
-play_game()
+play_game_vs_ai()
