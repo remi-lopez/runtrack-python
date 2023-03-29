@@ -27,7 +27,6 @@ def main():
                 length = len(w)
                 values[length] = values.get(length, 0) + 1
 
-            # retrieve the relevant info from the dict
             lengths, counts = zip(*values.items())
 
             fig, axs = plt.subplots(1, 1, figsize=(9, 3), sharey=True)
