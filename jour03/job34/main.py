@@ -11,7 +11,7 @@ def read_txt():
             data = f.read()
             data_str = str(data).lower()
 
-            for suffix in (':', ';', '!', '?', '"', '+', '/', '(', ')', '*', '§', '\n'):
+            for suffix in (':', ';', '!', '?', '"', '+', '/', '(', ')', '*', '§', '\n', '-'):
                 data_str = [d.removesuffix(suffix) for d in data_str]
 
             for i in range(len(data_str) - 1):
@@ -32,23 +32,40 @@ def read_txt():
 
 
 def generate_word():
-    # Choisir une longueur de mot au hasard, en se basant sur les longueurs observées dans le texte
     lengths = list(occurrences.keys())
     length = random.choice(lengths)
 
-    # Choisir une première lettre au hasard, en se basant sur les lettres observées en début de mot dans le texte
-    first_letters = list(occurrences[length].keys())
-    first_letter = random.choice(first_letters)
+    letter_keys = list(occurrences[length].keys())
+    letter_values = list(occurrences[length].values())
 
-    word = length + first_letter
+    first_letter = random.choice(letter_keys)
+
+    if content == '':
+        word = length.upper() + first_letter
+    else:
+        word = length + first_letter
 
     for c in list(occurrences[length].items()):
-        letter_keys = list(occurrences[length].keys())
-        letter_values = list(occurrences[length].values())
-
+        last_letter = word[-1]
         total_occurrences = sum(letter_values)
         percentages = [value / total_occurrences for value in letter_values]
         next_letter = random.choices(letter_keys, weights=percentages)[0]
+
+        if last_letter == next_letter:
+            next_letter = random.choices(letter_keys, weights=percentages)[0]
+        elif last_letter == ',':
+            next_letter = ' ' + random.choices(letter_keys, weights=percentages)[0]
+        elif last_letter == '-':
+            next_letter = random.choices(letter_keys, weights=percentages)[0]
+        elif last_letter == '.':
+            next_letter = random.choices(letter_keys, weights=percentages)[0]
+            if next_letter == ' ':
+                next_letter = str(next_letter.upper())
+            else:
+                next_letter = ' ' + str(next_letter.upper())
+        elif last_letter == ' ' and last_letter == next_letter:
+            next_letter = random.choices(letter_keys, weights=percentages)[0]
+
         word += next_letter
 
     return word
@@ -60,11 +77,20 @@ if __name__ == "__main__":
 
     content = ''
 
-    random_words = random.randrange(4, 17)
+    random_words = random.randrange(4, 12)
 
     for s in range(5):
         for i in range(random_words):
             word = generate_word()
+
+            if content == '':
+                if word[0] == ' ':
+                    word.replace(" ", "", 1)
+                elif word[0] == ',':
+                    word.replace(",", "", 1)
+                elif word[0] == '.':
+                    word.replace(".", "", 1)
+
             content += word
 
     print(content)
