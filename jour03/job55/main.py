@@ -21,6 +21,6 @@ if __name__ == "__main__":
     for p in pokemon:
         for t in txt:
             if p == t:
-                print('Pokemon %s founded' % p)
+                print('Pokemon "%s" founded' % p)
                 break
 
